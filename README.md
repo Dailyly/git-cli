@@ -21,3 +21,14 @@ git-cli delete -f
 - 拉取远程分支与本地分支，过滤后剩余未匹配到远程的本地分支, 可手动选择性地删除剩余分支
 
 
+### ToDo List
+- [] 删除本地分支
+    - [] 列出本地所有分支选择性删除
+    - [] 快捷删除，与远程对比，删除远程没有的分支。
+- [] 删除远程分支
+
+
+### 学习参考文档
+[关于package.json中bin的用法](https://juejin.cn/post/7124217557079883812)
+
+[工具指南](https://github.com/huaize2020/awesome-nodejs)

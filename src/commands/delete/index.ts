@@ -17,8 +17,8 @@ const del = (): void => {
           choices: all.map((branch) => ({
             name:
               branch === current
-                ? chalk.red(`${branch}（当前分支）`)
-                : `${branch}`,
+                ? chalk.red(`${branch}（当前分支1）`)
+                : chalk.green(`${branch}`),
             disabled: branch === current,
           })),
         },

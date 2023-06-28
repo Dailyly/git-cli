@@ -6,7 +6,7 @@ const program = new Command()
 
 program
   .command('delete')
-  .description('删除分支')
+  .description('删除分支3')
   .option('-f, --force', '强制删除非远程分支的本地分支')
   .option('-s, --select', '可选删除非远程分支的本地分支')
   .action((name, options) => {
