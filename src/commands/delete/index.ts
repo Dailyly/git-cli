@@ -7,7 +7,8 @@ const git = simpleGit()
 
 const del = (): void => {
   git.branchLocal().then((res) => {
-    const { all, current } = res
+    const { all, current, branches } = res
+    console.log('all, branches', all, branches)
     inquirer
       .prompt([
         {
@@ -17,8 +18,12 @@ const del = (): void => {
           choices: all.map((branch) => ({
             name:
               branch === current
-                ? chalk.red(`${branch}（当前分支1）`)
-                : chalk.green(`${branch}`),
+                ? chalk.red(
+                    `${branch}（当前分支1）（${branches[branch]?.label}）`,
+                  )
+                : chalk.green(`${branch} （${branches[branch]?.label}）`),
+            value: branch,
+            short: 'ddd',
             disabled: branch === current,
           })),
         },
@@ -38,8 +43,8 @@ const del = (): void => {
           .then((answers) => {
             const { askAgain } = answers
             if (askAgain) {
-              Spinner.start('正在删除')
-              git.deleteLocalBranches(devBranchs).then(() => {
+              Spinner.start()
+              git.deleteLocalBranches(devBranchs, true).then(() => {
                 Spinner.stop(true)
                 console.log(chalk.green('删除成功！'))
               })
