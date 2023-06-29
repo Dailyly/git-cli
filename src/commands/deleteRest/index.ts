@@ -6,7 +6,9 @@ import Table from 'cli-table'
 
 const git = simpleGit()
 
-const getRestBranch = (remoteList, localList, current) => {
+// 获取diff远程分支后的差异本地分支
+const getRestBranch = (remoteList, localBranchs, current) => {
+  const { all: localList, branches } = localBranchs
   const restBranch = []
 
   const filterRemoteList = remoteList.map((rBranch) =>
@@ -14,24 +16,31 @@ const getRestBranch = (remoteList, localList, current) => {
   )
   for (const lBranch of localList) {
     if (!filterRemoteList.includes(lBranch) && lBranch !== current) {
-      restBranch.push(lBranch)
+      restBranch.push({
+        label: lBranch,
+        value: lBranch,
+        info: branches[lBranch].label,
+      })
     }
   }
 
   return restBranch
 }
 
+// 将可选择的分支展现出来
 const loggerTable = (list = []) => {
   const table = new Table({
-    style: { head: ['green'] },
-    head: ['与远程对比后余下分支'],
-    colWidths: [30],
+    head: ['本地分支', 'commit信息'],
+    colWidths: [21, 25],
   })
-  const data = list.map((item) => [item])
+  console.log('list', list)
+  const data = list.map((item) => [item.value, item.info])
   table.push(...data)
+  console.log('table', table)
   console.log(table.toString())
 }
 
+// 删除本地分支
 const deleteBranchIng = (branchs) => {
   Spinner.start('正在删除...')
   git.deleteLocalBranches(branchs).then(() => {
@@ -42,16 +51,15 @@ const deleteBranchIng = (branchs) => {
 
 const deleteCompareRemote = async (r) => {
   Spinner.start('正在从远程拉取分支...')
+  git.pull('origin')
+  Spinner.stop(true)
+
   const fetchArr = [await git.branch(['-r']), await git.branchLocal()]
   Promise.all(fetchArr)
     .then((result) => {
       Spinner.stop(true)
       const { current } = result[1]
-      const restBranchList = getRestBranch(
-        result[0].all,
-        result[1].all,
-        current,
-      )
+      const restBranchList = getRestBranch(result[0].all, result[1], current)
 
       if (!restBranchList.length) {
         console.log(
@@ -61,48 +69,24 @@ const deleteCompareRemote = async (r) => {
         )
         return
       }
-      if (r === '-f') {
-        loggerTable(restBranchList)
 
-        inquirer
-          .prompt([
-            {
-              type: 'confirm',
-              loop: false,
-              name: 'isDelete',
-              message: '是否一键删除表中所有分支(已自动过滤当前分支)？',
-            },
-          ])
-          .then((answers) => {
-            const { isDelete } = answers
-            if (isDelete) {
-              deleteBranchIng(restBranchList)
-            }
-          })
-      } else {
-        inquirer
-          .prompt([
-            {
-              type: 'checkbox',
-              loop: false,
-              name: 'branchs',
-              message: '请选择需要删除的分支(已自动过滤当前分支)',
-              choices: restBranchList,
-            },
-            {
-              type: 'confirm',
-              loop: false,
-              name: 'isDelete',
-              message: '是否一键删除所选分支？',
-            },
-          ])
-          .then((answers) => {
-            const { branchs, isDelete } = answers
-            if (branchs.length && isDelete) {
-              deleteBranchIng(branchs)
-            }
-          })
-      }
+      loggerTable(restBranchList)
+
+      // inquirer
+      //   .prompt([
+      //     {
+      //       type: 'confirm',
+      //       loop: false,
+      //       name: 'isDelete',
+      //       message: '是否一键删除表中所有分支(已自动过滤当前分支)？',
+      //     },
+      //   ])
+      //   .then((answers) => {
+      //     const { isDelete } = answers
+      //     if (isDelete) {
+      //       deleteBranchIng(restBranchList)
+      //     }
+      //   })
     })
     .catch((e) => {
       chalk.red('拉取远程分支失败')

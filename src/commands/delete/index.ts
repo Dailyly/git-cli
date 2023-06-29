@@ -8,7 +8,6 @@ const git = simpleGit()
 const del = (): void => {
   git.branchLocal().then((res) => {
     const { all, current, branches } = res
-    console.log('all, branches', all, branches)
     inquirer
       .prompt([
         {
@@ -23,7 +22,6 @@ const del = (): void => {
                   )
                 : chalk.green(`${branch} （${branches[branch]?.label}）`),
             value: branch,
-            short: 'ddd',
             disabled: branch === current,
           })),
         },
