@@ -70,7 +70,21 @@ const deleteCompareRemote = async (r) => {
         return
       }
 
-      loggerTable(restBranchList)
+      inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'devBranchs',
+          message: 'Which branchs do you want to select?',
+          choices: restBranchList.map((branch) => ({
+            name:
+              branch === current
+                ? chalk.red(`${branch.label}（当前分支1）（${branch.info}）`)
+                : chalk.green(`${branch.label} （${branch.info}）`),
+            value: branch,
+            disabled: branch === current,
+          })),
+        },
+      ])
 
       // inquirer
       //   .prompt([
